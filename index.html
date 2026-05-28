@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGIS FoMasFam Finder - Assistant d'Accompagnement et Placement Handicap</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">AGIS</div>
+        <div class="logo-text">
+          <span class="logo-title">FoMasFam Finder</span>
+          <span class="logo-subtitle">PLACEMENT HANDICAP</span>
+        </div>
+      </div>
+      
+      <div class="nav-menu">
+        <button class="nav-item active" id="nav-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Tableau de Bord</span>
+        </button>
+        <button class="nav-item" id="nav-leads">
+          <i data-lucide="list"></i>
+          <span>Toutes les Demandes</span>
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+      
+      <div class="sidebar-section-title">Recherche Manuelle</div>
+      
+      <!-- Search Query Wizard -->
+      <div class="search-wizard-box">
+        <span class="wizard-title">Générateur de Requêtes</span>
+        <p class="wizard-desc">Ouvrez des recherches ciblées directement sur les plateformes avec les bons mots-clés.</p>
+        <div class="wizard-links">
+          <a href="#" target="_blank" id="wizard-google" class="wizard-btn">
+            <span>Recherche Google</span>
+            <i data-lucide="external-link"></i>
+          </a>
+          <a href="#" target="_blank" id="wizard-facebook" class="wizard-btn">
+            <span>Groupes Facebook</span>
+            <i data-lucide="external-link"></i>
+          </a>
+          <a href="#" target="_blank" id="wizard-doctissimo" class="wizard-btn">
+            <span>Forum Doctissimo</span>
+            <i data-lucide="external-link"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="sidebar-divider"></div>
+      
+      <div class="sidebar-section-title">À propos de l'application</div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; padding: 0 0.5rem;">
+        <strong>AGIS FoMasFam Finder</strong> permet de centraliser et d'organiser les demandes d'aidants familiaux recherchant des places en structures adaptées (Foyer de Vie / Foyer Occupationnel, MAS, FAM) afin de faciliter la prise de contact et le suivi.
+      </p>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="page-title-area">
+          <h1 class="page-title" id="current-view-title">Tableau de Bord</h1>
+        </div>
+        
+        <div class="header-actions">
+          <div class="search-bar-container">
+            <i data-lucide="search"></i>
+            <input type="text" id="global-search-input" class="search-input" placeholder="Rechercher prénom, handicap, région...">
+          </div>
+          
+          <button class="btn btn-secondary" id="btn-export-data" title="Exporter en JSON">
+            <i data-lucide="download"></i>
+            <span>Exporter</span>
+          </button>
+          <button class="btn btn-secondary" id="btn-import-data" title="Importer du JSON">
+            <i data-lucide="upload"></i>
+            <span>Importer</span>
+          </button>
+          <input type="file" id="import-file-input" class="hidden" accept=".json">
+
+          <button class="btn btn-primary" id="btn-add-lead">
+            <i data-lucide="plus"></i>
+            <span>Ajouter une demande</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <div class="dashboard-view" id="view-dashboard">
+        
+        <!-- Metrics Summary Cards -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">Demandes FO</span>
+              <span class="metric-value" id="count-fo">0</span>
+              <span class="metric-change">Foyer Occupationnel</span>
+            </div>
+            <div class="metric-icon-wrapper emerald">
+              <i data-lucide="home"></i>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">Demandes MAS</span>
+              <span class="metric-value" id="count-mas">0</span>
+              <span class="metric-change">Maison Acc. Spécialisée</span>
+            </div>
+            <div class="metric-icon-wrapper primary">
+              <i data-lucide="activity"></i>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">Demandes FAM</span>
+              <span class="metric-value" id="count-fam">0</span>
+              <span class="metric-change">Foyer Acc. Médicalisé</span>
+            </div>
+            <div class="metric-icon-wrapper blue">
+              <i data-lucide="heart-pulse"></i>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">Placements Sécurisés</span>
+              <span class="metric-value" id="count-secured">0</span>
+              <span class="metric-change" id="percent-secured">0% résolus</span>
+            </div>
+            <div class="metric-icon-wrapper emerald">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Layout Grid -->
+        <div class="dashboard-grid">
+          
+          <!-- Left Column: Map & Crawler -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Map Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <span class="panel-title">
+                  <i data-lucide="map-pin" style="color: var(--primary);"></i>
+                  Carte d'Urgence Régionale
+                </span>
+                <span class="badge" id="map-filter-indicator" style="background: rgba(139, 92, 246, 0.15); color: var(--text-primary); cursor: pointer; display: none;">Filtré: <span id="map-filtered-region"></span> &times;</span>
+              </div>
+              <div class="panel-body" style="padding: 1rem;">
+                <div class="map-container">
+                  <!-- Geometric Stylized France Map -->
+                  <svg id="france-map" viewBox="0 0 500 500">
+                    <!-- HDF (Hauts-de-France) -->
+                    <path d="M 220 30 L 300 30 L 290 100 L 230 100 Z" data-region="Hauts-de-France" id="map-hdf"></path>
+                    <!-- NOR (Normandie) -->
+                    <path d="M 140 100 L 230 100 L 210 150 L 120 150 Z" data-region="Normandie" id="map-nor"></path>
+                    <!-- IDF (Île-de-France) -->
+                    <path d="M 230 100 L 290 100 L 280 150 L 210 150 Z" data-region="Île-de-France" id="map-idf"></path>
+                    <!-- GES (Grand Est) -->
+                    <path d="M 290 50 L 400 80 L 410 180 L 330 180 L 290 100 Z" data-region="Grand Est" id="map-ges"></path>
+                    <!-- BRE (Bretagne) -->
+                    <path d="M 40 140 L 120 150 L 100 200 L 30 180 Z" data-region="Bretagne" id="map-bre"></path>
+                    <!-- PDL (Pays de la Loire) -->
+                    <path d="M 120 150 L 210 150 L 190 220 L 100 200 Z" data-region="Pays de la Loire" id="map-pdl"></path>
+                    <!-- CVL (Centre-Val de Loire) -->
+                    <path d="M 210 150 L 280 150 L 270 230 L 190 220 Z" data-region="Centre-Val de Loire" id="map-cvl"></path>
+                    <!-- BFC (Bourgogne-Franche-Comté) -->
+                    <path d="M 280 150 L 330 180 L 390 180 L 370 260 L 270 230 Z" data-region="Bourgogne-Franche-Comté" id="map-bfc"></path>
+                    <!-- NAQ (Nouvelle-Aquitaine) -->
+                    <path d="M 100 200 L 190 220 L 270 230 L 240 370 L 100 350 L 80 270 Z" data-region="Nouvelle-Aquitaine" id="map-naq"></path>
+                    <!-- ARA (Auvergne-Rhône-Alpes) -->
+                    <path d="M 270 230 L 370 260 L 400 340 L 300 350 L 260 290 Z" data-region="Auvergne-Rhône-Alpes" id="map-ara"></path>
+                    <!-- OCC (Occitanie) -->
+                    <path d="M 190 350 L 300 350 L 280 430 L 160 410 Z" data-region="Occitanie" id="map-occ"></path>
+                    <!-- PACA (Provence-Alpes-Côte d'Azur) -->
+                    <path d="M 300 350 L 400 340 L 410 400 L 330 420 Z" data-region="Provence-Alpes-Côte d'Azur" id="map-paca"></path>
+                    <!-- COR (Corse) -->
+                    <path d="M 420 420 L 445 420 L 440 460 L 415 465 Z" data-region="Corse" id="map-cor"></path>
+                  </svg>
+                  
+                  <div class="map-tooltip" id="map-tooltip">Région</div>
+                </div>
+                <div style="font-size: 0.75rem; text-align: center; color: var(--text-muted); margin-top: 0.5rem;">
+                  Cliquez sur une région pour filtrer les fiches.
+                </div>
+              </div>
+            </div>
+
+            <!-- Simulated Crawler Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <span class="panel-title">
+                  <i data-lucide="terminal" style="color: var(--accent-cyan);"></i>
+                  Console de Scan Réseau
+                </span>
+                <div class="scan-loader" id="scan-status-indicator" style="display: none;">
+                  <span class="pulse-dot"></span>
+                  <span>SCAN EN COURS</span>
+                </div>
+                <button class="btn btn-accent" id="btn-trigger-scan" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                  Lancer le Scan
+                </button>
+              </div>
+              <div class="panel-body" style="padding: 0.5rem;">
+                <div class="crawler-console">
+                  <div class="console-header">
+                    <div class="console-dots">
+                      <span class="console-dot red"></span>
+                      <span class="console-dot yellow"></span>
+                      <span class="console-dot green"></span>
+                    </div>
+                    <span class="console-status">System: Idle</span>
+                  </div>
+                  <div class="console-body" id="console-logs">
+                    <div class="console-line info">Initialisation console AGIS... En attente d'activation.</div>
+                    <div class="console-line console-input-line">run crawler_agent.sh</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Lead List Cards -->
+          <div class="panel" style="flex: 1;">
+            <div class="panel-header">
+              <span class="panel-title">
+                <i data-lucide="alert-circle" style="color: var(--color-mas);"></i>
+                Fiches d'Urgences Actives
+              </span>
+              <div class="filter-tabs">
+                <button class="filter-tab active" id="tab-all">Tout</button>
+                <button class="filter-tab" id="tab-fo">FO</button>
+                <button class="filter-tab" id="tab-mas">MAS</button>
+                <button class="filter-tab" id="tab-fam">FAM</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="filters-bar">
+                <select id="filter-region" class="select-filter">
+                  <option value="">Toutes les régions</option>
+                  <option value="Auvergne-Rhône-Alpes">Auvergne-Rhône-Alpes</option>
+                  <option value="Bourgogne-Franche-Comté">Bourgogne-Franche-Comté</option>
+                  <option value="Bretagne">Bretagne</option>
+                  <option value="Centre-Val de Loire">Centre-Val de Loire</option>
+                  <option value="Corse">Corse</option>
+                  <option value="Grand Est">Grand Est</option>
+                  <option value="Hauts-de-France">Hauts-de-France</option>
+                  <option value="Île-de-France">Île-de-France</option>
+                  <option value="Normandie">Normandie</option>
+                  <option value="Nouvelle-Aquitaine">Nouvelle-Aquitaine</option>
+                  <option value="Occitanie">Occitanie</option>
+                  <option value="Pays de la Loire">Pays de la Loire</option>
+                  <option value="Provence-Alpes-Côte d'Azur">Provence-Alpes-Côte d'Azur</option>
+                </select>
+
+                <select id="filter-status" class="select-filter">
+                  <option value="">Tous les statuts</option>
+                  <option value="New">Nouveau (Non contacté)</option>
+                  <option value="Contacted">Contacté</option>
+                  <option value="Waiting List">Liste d'attente</option>
+                  <option value="Interview Scheduled">Entretien prévu</option>
+                  <option value="Spot Secured">Place obtenue</option>
+                  <option value="Closed">Fermé / Sans suite</option>
+                </select>
+
+                <select id="filter-priority" class="select-filter">
+                  <option value="">Toutes les priorités</option>
+                  <option value="High">Urgent (Haute)</option>
+                  <option value="Medium">Moyenne</option>
+                  <option value="Low">Basse</option>
+                </select>
+                
+                <button class="btn btn-secondary" id="btn-clear-filters" style="padding: 0.5rem 0.75rem; font-size: 0.75rem; display: none;">
+                  <i data-lucide="filter-x"></i> Réinitialiser
+                </button>
+              </div>
+
+              <!-- Main feed for cards -->
+              <div class="lead-cards-grid" id="leads-cards-container">
+                <!-- Javascript will inject cards here -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 2: ALL LEADS (TABLE OR LIST WITH DETAILS) -->
+      <div class="dashboard-view hidden" id="view-all-leads">
+        <div class="panel" style="width: 100%;">
+          <div class="panel-header">
+            <span class="panel-title">
+              <i data-lucide="folder-open"></i>
+              Base de Données Complète
+            </span>
+          </div>
+          <div class="panel-body">
+            <!-- Reuse card filter bar or custom search -->
+            <div id="all-leads-table-container">
+              <!-- Grid view of all items -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- SLIDE-OUT DETAIL DRAWER -->
+    <div class="drawer-overlay" id="drawer-overlay">
+      <div class="detail-drawer" id="detail-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title-area">
+            <span id="drawer-type-badge" class="badge badge-type MAS" style="width: fit-content;">MAS</span>
+            <h2 id="drawer-title" class="card-title" style="font-size: 1.15rem; margin-top: 0.25rem;">Recherche place en MAS</h2>
+          </div>
+          <button class="close-btn" id="btn-close-drawer">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        
+        <div class="drawer-body">
+          
+          <!-- Status Manager Section -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Statut & Urgence</span>
+            <div class="detail-grid">
+              <div class="status-select-wrap">
+                <label class="detail-label">Statut Actuel</label>
+                <select id="drawer-status-select" class="form-select" style="background-color: rgba(255,255,255,0.05); padding: 0.4rem;">
+                  <option value="New">Nouveau</option>
+                  <option value="Contacted">Contacté</option>
+                  <option value="Waiting List">Liste d'attente</option>
+                  <option value="Interview Scheduled">Entretien prévu</option>
+                  <option value="Spot Secured">Place obtenue</option>
+                  <option value="Closed">Fermé / Sans suite</option>
+                </select>
+              </div>
+              <div class="status-select-wrap">
+                <label class="detail-label">Niveau d'Urgence</label>
+                <select id="drawer-priority-select" class="form-select" style="background-color: rgba(255,255,255,0.05); padding: 0.4rem;">
+                  <option value="High">Urgent (Haute)</option>
+                  <option value="Medium">Moyenne</option>
+                  <option value="Low">Basse</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient Profile -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Profil du Résident</span>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Membre de la famille</span>
+                <span class="detail-value" id="drawer-family-member">Thomas</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Âge</span>
+                <span class="detail-value" id="drawer-age">22 ans</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Type de handicap</span>
+                <span class="detail-value" id="drawer-handicap">Polyhandicap</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Région géographique</span>
+                <span class="detail-value" id="drawer-region" style="color: var(--accent-purple);">Île-de-France</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Post Content -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Message / Description</span>
+            <div class="description-box" id="drawer-description">
+              Bonjour, nous recherchons une place...
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <span id="drawer-date">Publié le 27/05/2026</span>
+              <a href="#" target="_blank" id="drawer-social-link" class="info-item" style="color: var(--primary); font-weight: 500; text-decoration: none;">
+                Voir le post original <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Informations de Contact</span>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Contact Principal</span>
+                <span class="detail-value" id="drawer-contact-name">Valérie Gauthier (Mère)</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Téléphone</span>
+                <span class="detail-value" id="drawer-contact-phone">+33 6 89 54 32 10</span>
+              </div>
+              <div class="detail-item" style="grid-column: span 2;">
+                <span class="detail-label">E-mail</span>
+                <span class="detail-value" id="drawer-contact-email">valerie.gauthier.pro@gmail.com</span>
+              </div>
+            </div>
+            
+            <div class="contact-actions">
+              <a href="#" id="drawer-call-btn" class="contact-link-pill">
+                <i data-lucide="phone"></i>
+                <span>Appeler</span>
+              </a>
+              <a href="#" id="drawer-mail-btn" class="contact-link-pill">
+                <i data-lucide="mail"></i>
+                <span>Envoyer un E-mail</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Action Log / Notes -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Notes de Suivi</span>
+            <div class="form-group">
+              <textarea id="drawer-notes-input" class="form-textarea" rows="3" placeholder="Saisir des notes, dates d'appels, ou retours d'établissement..."></textarea>
+            </div>
+            <button class="btn btn-secondary" id="btn-save-notes" style="width: fit-content; align-self: flex-end; padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+              Sauvegarder les notes
+            </button>
+          </div>
+
+          <!-- Activation Template Generator -->
+          <div class="drawer-section">
+            <span class="drawer-section-title">Module d'Activation Directe</span>
+            <p class="wizard-desc">Sélectionnez un modèle de message en français pour démarrer la prise de contact ou proposer une place disponible.</p>
+            <div class="activation-section">
+              <select id="activation-template-select" class="form-select">
+                <option value="request-info">1. Demande d'informations complémentaires (Dossier MDPH)</option>
+                <option value="spot-available">2. Signalement d'une place disponible / opportunité</option>
+                <option value="support-offer">3. Proposition d'aide aux démarches administratives</option>
+              </select>
+              
+              <div class="template-body-preview" id="activation-template-preview">
+                Template body...
+              </div>
+              
+              <div class="template-actions">
+                <button class="btn btn-accent" id="btn-copy-template" style="flex: 1;">
+                  <i data-lucide="copy"></i> Copier
+                </button>
+                <button class="btn btn-primary" id="btn-send-template" style="flex: 1;">
+                  <i data-lucide="send"></i> Envoyer par Mail
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete lead option -->
+          <div style="margin-top: 1rem; border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 1rem; display: flex; justify-content: flex-end;">
+            <button class="btn" id="btn-delete-lead" style="background: rgba(239, 68, 68, 0.1); color: var(--priority-high); border: 1px solid rgba(239, 68, 68, 0.3);">
+              <i data-lucide="trash-2"></i> Supprimer la fiche
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT LEAD -->
+    <div class="modal-overlay" id="add-lead-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-form-title">Créer une fiche de demande</h2>
+        </div>
+        
+        <div class="modal-body">
+          <form id="lead-form">
+            <input type="hidden" id="form-lead-id">
+            
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="form-type">Type de structure *</label>
+                <select id="form-type" class="form-select" required>
+                  <option value="FO">FO (Foyer de Vie / Occupationnel)</option>
+                  <option value="MAS">MAS (Maison d'Accueil Spécialisée)</option>
+                  <option value="FAM">FAM (Foyer d'Accueil Médicalisé)</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="form-priority">Niveau d'Urgence *</label>
+                <select id="form-priority" class="form-select" required>
+                  <option value="High">Urgent (Haute)</option>
+                  <option value="Medium" selected>Moyenne</option>
+                  <option value="Low">Basse</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="form-title">Titre de la fiche *</label>
+              <input type="text" id="form-title" class="form-input" placeholder="Ex: Recherche place MAS en urgence - Paul, 24 ans" required>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="form-family-member">Prénom du résident *</label>
+                <input type="text" id="form-family-member" class="form-input" placeholder="Ex: Paul" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="form-age">Âge *</label>
+                <input type="number" id="form-age" class="form-input" placeholder="Ex: 24" min="0" max="120" required>
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="form-handicap">Type de handicap</label>
+                <input type="text" id="form-handicap" class="form-input" placeholder="Ex: Autisme (TSA), Polyhandicap...">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="form-region">Région géographique *</label>
+                <select id="form-region" class="form-select" required>
+                  <option value="" disabled selected>Choisir une région</option>
+                  <option value="Auvergne-Rhône-Alpes">Auvergne-Rhône-Alpes</option>
+                  <option value="Bourgogne-Franche-Comté">Bourgogne-Franche-Comté</option>
+                  <option value="Bretagne">Bretagne</option>
+                  <option value="Centre-Val de Loire">Centre-Val de Loire</option>
+                  <option value="Corse">Corse</option>
+                  <option value="Grand Est">Grand Est</option>
+                  <option value="Hauts-de-France">Hauts-de-France</option>
+                  <option value="Île-de-France">Île-de-France</option>
+                  <option value="Normandie">Normandie</option>
+                  <option value="Nouvelle-Aquitaine">Nouvelle-Aquitaine</option>
+                  <option value="Occitanie">Occitanie</option>
+                  <option value="Pays de la Loire">Pays de la Loire</option>
+                  <option value="Provence-Alpes-Côte d'Azur">Provence-Alpes-Côte d'Azur</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="form-description">Description détaillée du post ou besoin *</label>
+              <textarea id="form-description" class="form-textarea" rows="4" placeholder="Recopier le contenu du message trouvé en ligne ou détailler la situation..." required></textarea>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="form-contact-name">Nom du contact principal *</label>
+                <input type="text" id="form-contact-name" class="form-input" placeholder="Ex: Marie Durand (Mère)" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="form-contact-phone">Numéro de téléphone</label>
+                <input type="tel" id="form-contact-phone" class="form-input" placeholder="Ex: +33 6 12 34 56 78">
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label class="form-label" for="form-contact-email">Adresse E-mail</label>
+                <input type="email" id="form-contact-email" class="form-input" placeholder="Ex: marie.durand@email.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="form-contact-social">Lien vers le post original</label>
+                <input type="url" id="form-contact-social" class="form-input" placeholder="Ex: URL Facebook post, forum thread...">
+              </div>
+            </div>
+          </form>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="btn-cancel-modal">Annuler</button>
+          <button class="btn btn-primary" id="btn-submit-form" type="submit" form="lead-form">Sauvegarder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Area -->
+    <div class="toast-container" id="toast-container"></div>
+
+  </div>
+
+  <!-- Lucide Icons initialization -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
