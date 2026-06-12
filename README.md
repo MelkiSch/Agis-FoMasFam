@@ -52,3 +52,6 @@ Clicking "Lancer le Scan" boots up the log cycle. After a short interval, it dis
 Export: Download the entire current database state as a JSON file.
 Import: Upload a backup JSON file to sync records or restore data.
 Manual Input: Form modal to manually create or modify fiches.
+
+
+This test app is copyrighted
